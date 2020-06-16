@@ -47,35 +47,19 @@ def get_items(selected_filter):
     items_list = list(items_df[selected_filter].sort_values(ascending=False))
     return items_list
 
-
-def get_wids(selected_filter, selected_items):
-    # We probably need to test if either of these is None
-
-    table_query = (
-        f'''
-        SELECT WID
-        FROM test
-        WHERE {selected_filter} = '{selected_items}'
-        '''
-    )
-    wid_df = fetch_data(table_query)
-    wid_ints = wid_df['WID'].tolist()
-    wid_list = [str(wid_ints) for wid_ints in wid_ints]
-    return wid_list
-
-
-def get_graphdf(wid_list):
-
+def get_graphdf(selected_filter, selected_items):
     graph_query = (
         f'''
-            SELECT DOFP, Load
-            FROM graph
-            WHERE WID
-            IN ('%s')
-            GROUP BY DOFP, Load
-            ORDER BY DOFP, Load
-            '''
-        % ("','".join(wid_list))
+        SELECT DOFP, Load
+        FROM graph
+        WHERE WID IN (
+            SELECT WID
+            FROM test
+            WHERE {selected_filter} = '{selected_items}'
+        )
+        GROUP BY DOFP, Load
+        ORDER BY DOFP, Load
+        '''
     )
     graphdf = fetch_data(graph_query)
     return graphdf
@@ -238,11 +222,11 @@ def populate_item_selector(selected_filter):
      Input(component_id='item-selector', component_property='value')]
 )
 def load_item_points_graph(selected_filter, selected_items):
-    results = get_wids(selected_filter, selected_items)
-    results_df = get_graphdf(results)
+    # You might try running these two in a single transaction
+    results_df = get_graphdf(selected_filter, selected_items)
 
     figure = []
-    if len(results) > 0:
+    if len(results_df) > 0:
         figure = draw_graph(results_df)
         return figure
     else:
