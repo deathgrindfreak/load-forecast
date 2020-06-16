@@ -34,6 +34,9 @@ def fetch_data(q):
 
 
 def get_items(selected_filter):
+    # I assume this returns a list; just don't run the query if dash passes "None"
+    if selected_filter == None:
+        return []
 
     items_query = (
         f'''
