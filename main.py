@@ -26,11 +26,10 @@ conn = pyodbc.connect('DRIVER={ODBC Driver 17 for SQL Server};'
 #############################################################
 
 def fetch_data(q):
-    result = pd.read_sql(
+    return pd.read_sql(
         sql=q,
         con=conn
     )
-    return result
 
 
 def get_items(selected_filter):
@@ -50,6 +49,7 @@ def get_items(selected_filter):
 
 
 def get_wids(selected_filter, selected_items):
+    # We probably need to test if either of these is None
 
     table_query = (
         f'''
